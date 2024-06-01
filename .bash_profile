@@ -1,8 +1,5 @@
 [ -f ~/.bashrc ] && . ~/.bashrc
 
-# Add fzf to PATH
-[[ ! "$PATH" == */home/kareulo/.fzf/bin* ]] && PATH="${PATH:+${PATH}:}/home/kareulo/.fzf/bin"
-
 export HISTCONTROL=ignoredups
 export HISTFILESIZE=10000
 export HISTSIZE=10000
