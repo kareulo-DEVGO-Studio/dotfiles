@@ -1,0 +1,52 @@
+#!/bin/bash
+
+_exec() {
+  "$@" &> /dev/null
+}
+
+_ISO() {
+  date +"%Y%m%d%H%M%S%z"
+}
+
+if ! _exec command -v git; then
+  echo 'Git is not installed. Please install it and try again.'
+  exit 1
+fi
+
+config_dir="$HOME/.config"
+config_entries=(
+  "$HOME/.bash_profile"
+  "$HOME/.bashrc"
+  "$HOME/.tmux.conf"
+  "$config_dir/alacritty"
+  "$config_dir/starship.toml"
+)
+
+for config_entry in "${config_entries[@]}"; do
+  if [[ -e "$config_entry" && ! -h "$config_entry" ]]; then
+    _exec mv "$config_entry" "$config_entry.$(_ISO).bak"
+  fi
+done
+
+_exec ln -sf "$(realpath .bash_profile)" "$HOME"
+_exec ln -sf "$(realpath .bashrc)" "$HOME"
+_exec ln -sf "$(realpath .tmux.conf)" "$HOME"
+_exec ln -sf "$(realpath alacritty)" "$config_dir"
+_exec ln -sf "$(realpath starship.toml)" "$config_dir"
+
+nvim_dir="$config_dir/nvim"
+nvim_bak="$nvim_dir.$(_ISO).bak"
+
+if [[ -d "$nvim_dir" ]]; then
+  _exec mv "$nvim_dir" "$nvim_bak"
+fi
+
+_exec git clone 'https://github.com/kareulo-DEVGO-Studio/nvim.git' "$nvim_dir"
+
+if [[ "$?" -ne 0 ]]; then
+  echo 'Git clone failed. Please check your internet connection.'
+  _exec mv "$nvim_bak" "$nvim_dir"
+  exit 1
+fi
+
+exit 0
